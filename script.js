@@ -8,7 +8,7 @@ let ctx = canvas.getContext('2d')
 const paddleLength = 150
 const paddleWidth = 10
 const paddleSpeed = 6
-const ballSpeed = 20
+const ballSpeed = 10
 
 window.addEventListener('keydown', (e) => {
   switch (e.key) {
@@ -71,15 +71,25 @@ const ballFactory = ({ x, y, velocityX, velocityY }) => {
     },
     update: () => {
       self.draw()
+
       if (self.y + self.velocityY > 0 && self.y + self.velocityY + 10 < window.innerHeight)
         self.y += self.velocityY
       else {
         self.velocityY = -self.velocityY
       }
-      if (self.x + self.velocityX > 0 && self.x + self.velocityX + 10 < window.innerWidth)
-        self.x += self.velocityX
-      else {
+
+      // handle paddle hits and reverse ball direction
+      if (
+        (self.y > player1.self.y &&
+          self.y < player1.self.y + paddleLength &&
+          self.x + self.velocityX < 20) ||
+        (self.y > player2.self.y &&
+          self.y < player2.self.y + paddleLength &&
+          self.x + self.velocityX > window.innerWidth - 20)
+      ) {
         self.velocityX = -self.velocityX
+      } else {
+        self.x += self.velocityX
       }
     },
   }
@@ -105,12 +115,11 @@ const coinFlip = () => {
   }
 }
 
-const player1 = paddleFactory({ x: 10, y: 100 })
+const player1 = paddleFactory({ x: 10, y: 300 })
 const player2 = paddleFactory({ x: window.innerWidth - 10 * 2, y: 100 })
 const ball = ballFactory({
   x: window.innerWidth / 2,
   y: window.innerHeight / 2,
-  // velocityX: randomDirection() * ballSpeed,
   // randomly pick a left or right direction, but ensure it's consistent speed
   velocityX: coinFlip(),
   velocityY: randomDirection() * (ballSpeed / 2),
